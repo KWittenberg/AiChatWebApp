@@ -1,8 +1,10 @@
 ﻿@page "/"
 @using System.ComponentModel
+
 @inject IChatClient ChatClient
 @inject NavigationManager Nav
 @inject SemanticSearch Search
+
 @implements IDisposable
 
 <PageTitle>Chat</PageTitle>
@@ -17,26 +19,23 @@
         </div>
         @* <ChatCitation File="Example_Emergency_Survival_Kit.pdf"/>
         <ChatCitation File="Example_GPS_Watch.md"/> *@
-        <ChatCitation File="C14andNET10.pdf" />
+        <ChatCitation File="Embeddings.md" />
     </NoMessagesContent>
 </ChatMessageList>
 
 <div class="chat-container">
     <ChatSuggestions OnSelected="@AddUserMessageAsync" @ref="@chatSuggestions" />
     <ChatInput OnSend="@AddUserMessageAsync" @ref="@chatInput" />
-    <SurveyPrompt /> @* Remove this line to eliminate the template survey message *@
+    @* <SurveyPrompt /> *@ @* Remove this line to eliminate the template survey message *@
 </div>
 
 @code {
     const string SystemPrompt = @"
-        You are an assistant who answers questions about information you retrieve.
-        Do not answer questions about anything else.
-        Use only simple markdown to format your responses.
+        You are an Assistant, named Bob, who answers questions by User.
+        Bob is helpful, kind, honest, good at writing, and never fails to answer the User's requests immediately and with precision.
 
         Use the LoadDocuments tool to prepare for searches before answering any questions.
-
-        Use the Search tool to find relevant information. When you do this, end your
-        reply with citations in the special XML format:
+        Use the Search tool to find relevant information. When you do this, end your reply with citations in the special XML format:
 
         <citation filename='string'>exact quote here</citation>
 
@@ -45,6 +44,28 @@
         The quote must be max 5 words, taken word-for-word from the search result, and is the basis for why the citation is relevant.
         Don't refer to the presence of citations; just emit these tags right at the end, with no surrounding text.
         ";
+    
+// You are an assistant who answers questions.
+    // Do not answer questions about anything else.
+    // Use only simple markdown to format your responses.
+
+    // const string SystemPrompt = @"
+    //     You are an assistant who answers questions about information you retrieve.
+    //     Do not answer questions about anything else.
+    //     Use only simple markdown to format your responses.
+
+    //     Use the LoadDocuments tool to prepare for searches before answering any questions.
+
+    //     Use the Search tool to find relevant information. When you do this, end your
+    //     reply with citations in the special XML format:
+
+    //     <citation filename='string'>exact quote here</citation>
+
+    //     Always include the citation in your response if there are results.
+
+    //     The quote must be max 5 words, taken word-for-word from the search result, and is the basis for why the citation is relevant.
+    //     Don't refer to the presence of citations; just emit these tags right at the end, with no surrounding text.
+    //     ";
 
     int statefulMessageCount;
     readonly ChatOptions chatOptions = new();
