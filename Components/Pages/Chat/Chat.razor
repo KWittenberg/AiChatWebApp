@@ -79,6 +79,7 @@
     {
         statefulMessageCount = 0;
         messages.Add(new(ChatRole.System, SystemPrompt));
+        
         chatOptions.Tools = [
             AIFunctionFactory.Create(LoadDocumentsAsync),
             AIFunctionFactory.Create(SearchAsync)

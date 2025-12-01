@@ -3,14 +3,13 @@ using Microsoft.Extensions.VectorData;
 
 namespace AiChatWebApp.Services;
 
-public class SemanticSearch(
-    VectorStoreCollection<string, IngestedChunk> vectorCollection,
-    [FromKeyedServices("ingestion_directory")] DirectoryInfo ingestionDirectory,
-    DataIngestor dataIngestor)
+public class SemanticSearch(VectorStoreCollection<string, IngestedChunk> vectorCollection,
+                            [FromKeyedServices("ingestion_directory")] DirectoryInfo ingestionDirectory,
+                            DataIngestor dataIngestor)
 {
-    private Task? _ingestionTask;
+    Task? _ingestionTask;
 
-    public async Task LoadDocumentsAsync() => await ( _ingestionTask ??= dataIngestor.IngestDataAsync(ingestionDirectory, searchPattern: "*.*"));
+    public async Task LoadDocumentsAsync() => await (_ingestionTask ??= dataIngestor.IngestDataAsync(ingestionDirectory, searchPattern: "*.*"));
 
     public async Task<IReadOnlyList<IngestedChunk>> SearchAsync(string text, string? documentIdFilter, int maxResults)
     {

@@ -9,10 +9,10 @@ builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 
 
 // Initialize Ollama API client
-string[] modelName = ["llama3.2", "tinyllama", "gemma3:1b", "qwen2.5:3b"];
+string[] modelName = ["all-minilm", "tinyllama", "qwen3:0.6b", "qwen3:1.7b", "qwen2.5:3b", "phi3:mini"];
 
-IChatClient chatClient = new OllamaApiClient(new Uri("http://localhost:11434"), modelName[0]);
-IEmbeddingGenerator<string, Embedding<float>> embeddingGenerator = new OllamaApiClient(new Uri("http://localhost:11434"), "all-minilm");
+IChatClient chatClient = new OllamaApiClient(new Uri("http://localhost:11434"), modelName[2]);
+IEmbeddingGenerator<string, Embedding<float>> embeddingGenerator = new OllamaApiClient(new Uri("http://localhost:11434"), modelName[0]);
 
 
 // Configure vector store
@@ -28,8 +28,10 @@ builder.Services.AddSingleton<SemanticSearch>();
 builder.Services.AddKeyedSingleton("ingestion_directory", new DirectoryInfo(Path.Combine(builder.Environment.WebRootPath, "Data")));
 
 
-builder.Services.AddChatClient(chatClient).UseFunctionInvocation().UseLogging(); // TinyLlama does not support function calling
-// builder.Services.AddChatClient(chatClient).UseLogging(); // Working with TinyLlama, but don't work! 
+builder.Services.AddChatClient(chatClient)
+                .UseFunctionInvocation() // Important for PDF/Document Search!
+                .UseLogging();
+
 
 builder.Services.AddEmbeddingGenerator(embeddingGenerator);
 
