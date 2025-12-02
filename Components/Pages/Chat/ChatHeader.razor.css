@@ -1,13 +1,18 @@
 .chat-header-container {
-    top: 0; 
-    padding: 1.5rem; 
+    top: 0;
+    padding: 1.5rem;
 }
 
 .chat-header-controls {
-    margin-bottom: 1.5rem; 
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1rem;
+    margin-bottom: 1.5rem;
 }
 
-h1 {
+h2 {
     overflow: hidden;
     text-overflow: ellipsis;
 }

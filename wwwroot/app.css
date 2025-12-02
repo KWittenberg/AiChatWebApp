@@ -33,6 +33,16 @@ h1:focus {
     outline: none;
 }
 
+h2 {
+    font-size: 1.5rem;
+    line-height: 1.5rem;
+    font-weight: 500;
+}
+
+    h2:focus {
+        outline: none;
+    }
+
 .valid.modified:not([type=checkbox]) {
     outline: 1px solid #26b050;
 }

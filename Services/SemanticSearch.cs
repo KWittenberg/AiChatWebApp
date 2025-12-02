@@ -9,7 +9,7 @@ public class SemanticSearch(VectorStoreCollection<string, IngestedChunk> vectorC
 {
     Task? _ingestionTask;
 
-    public async Task LoadDocumentsAsync() => await (_ingestionTask ??= dataIngestor.IngestDataAsync(ingestionDirectory, searchPattern: "*.*"));
+    // public async Task LoadDocumentsAsync() => await (_ingestionTask ??= dataIngestor.IngestDataAsync(ingestionDirectory, searchPattern: "*.*"));
 
     public async Task<IReadOnlyList<IngestedChunk>> SearchAsync(string text, string? documentIdFilter, int maxResults)
     {
@@ -22,5 +22,22 @@ public class SemanticSearch(VectorStoreCollection<string, IngestedChunk> vectorC
         });
 
         return await nearest.Select(result => result.Record).ToListAsync();
+    }
+
+    public async Task LoadDocumentsAsync()
+    {
+        // Ako vector-store.db postoji i nije prazan, preskoči ingestion
+        if (File.Exists(Path.Combine(AppContext.BaseDirectory, "vector-store.db")))
+        {
+            var info = new FileInfo(Path.Combine(AppContext.BaseDirectory, "vector-store.db"));
+            if (info.Length > 1024 * 10) // veći od 10KB = vjerovatno sadrži embeddinge
+            {
+                Console.WriteLine("📂 Dokumenti već probavljeni, preskačem ingestion...");
+                return;
+            }
+        }
+
+        Console.WriteLine("🚀 Pokrećem ingestion novih dokumenata...");
+        await (_ingestionTask ??= dataIngestor.IngestDataAsync(ingestionDirectory, searchPattern: "*.*"));
     }
 }

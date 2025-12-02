@@ -9,7 +9,7 @@ builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 
 
 // Initialize Ollama API client
-string[] modelName = ["all-minilm", "tinyllama", "qwen2.5-coder:1.5b"];
+string[] modelName = ["all-minilm", "tinyllama", "qwen3:1.7b"];
 IChatClient chatClient = new OllamaApiClient(new Uri("http://localhost:11434"), modelName[2]);
 IEmbeddingGenerator<string, Embedding<float>> embeddingGenerator = new OllamaApiClient(new Uri("http://localhost:11434"), modelName[0]);
 
