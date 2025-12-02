@@ -9,14 +9,14 @@ builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 
 
 // Initialize Ollama API client
-string[] modelName = ["all-minilm", "tinyllama", "qwen3:0.6b", "qwen3:1.7b", "qwen2.5:3b", "phi3:mini"];
-
+string[] modelName = ["all-minilm", "tinyllama", "qwen2.5-coder:1.5b"];
 IChatClient chatClient = new OllamaApiClient(new Uri("http://localhost:11434"), modelName[2]);
 IEmbeddingGenerator<string, Embedding<float>> embeddingGenerator = new OllamaApiClient(new Uri("http://localhost:11434"), modelName[0]);
 
 
-// Configure vector store
-var vectorStorePath = Path.Combine(AppContext.BaseDirectory, "vector-store.db");
+// Configure SQLite Vector Store
+string dbName = "vector-store.db";
+var vectorStorePath = Path.Combine(AppContext.BaseDirectory, dbName);
 var vectorStoreConnectionString = $"Data Source={vectorStorePath}";
 builder.Services.AddSqliteVectorStore(_ => vectorStoreConnectionString);
 builder.Services.AddSqliteCollection<string, IngestedChunk>(IngestedChunk.CollectionName, vectorStoreConnectionString);

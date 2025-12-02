@@ -14,11 +14,8 @@
 <ChatMessageList Messages="@messages" InProgressMessage="@currentResponseMessage">
     <NoMessagesContent>
         <div>
-            To get started, try asking about these example documents.<br />
-            You can replace these with your own data and replace this message.
+            To get started, try asking about these example documents.
         </div>
-        @* <ChatCitation File="Example_Emergency_Survival_Kit.pdf"/>
-        <ChatCitation File="Example_GPS_Watch.md"/> *@
         <ChatCitation File="Embeddings.md" />
     </NoMessagesContent>
 </ChatMessageList>
@@ -31,11 +28,14 @@
 
 @code {
     const string SystemPrompt = @"
-        You are an Assistant, named Bob, who answers questions by User.
-        Bob is helpful, kind, honest, good at writing, and never fails to answer the User's requests immediately and with precision.
+        You are an assistant who answers questions about information you retrieve.
+        Do not answer questions about anything else.
+        Use only simple markdown to format your responses.
 
         Use the LoadDocuments tool to prepare for searches before answering any questions.
-        Use the Search tool to find relevant information. When you do this, end your reply with citations in the special XML format:
+
+        Use the Search tool to find relevant information. When you do this, end your
+        reply with citations in the special XML format:
 
         <citation filename='string'>exact quote here</citation>
 
@@ -44,28 +44,6 @@
         The quote must be max 5 words, taken word-for-word from the search result, and is the basis for why the citation is relevant.
         Don't refer to the presence of citations; just emit these tags right at the end, with no surrounding text.
         ";
-    
-// You are an assistant who answers questions.
-    // Do not answer questions about anything else.
-    // Use only simple markdown to format your responses.
-
-    // const string SystemPrompt = @"
-    //     You are an assistant who answers questions about information you retrieve.
-    //     Do not answer questions about anything else.
-    //     Use only simple markdown to format your responses.
-
-    //     Use the LoadDocuments tool to prepare for searches before answering any questions.
-
-    //     Use the Search tool to find relevant information. When you do this, end your
-    //     reply with citations in the special XML format:
-
-    //     <citation filename='string'>exact quote here</citation>
-
-    //     Always include the citation in your response if there are results.
-
-    //     The quote must be max 5 words, taken word-for-word from the search result, and is the basis for why the citation is relevant.
-    //     Don't refer to the presence of citations; just emit these tags right at the end, with no surrounding text.
-    //     ";
 
     int statefulMessageCount;
     readonly ChatOptions chatOptions = new();
@@ -79,7 +57,7 @@
     {
         statefulMessageCount = 0;
         messages.Add(new(ChatRole.System, SystemPrompt));
-        
+
         chatOptions.Tools = [
             AIFunctionFactory.Create(LoadDocumentsAsync),
             AIFunctionFactory.Create(SearchAsync)

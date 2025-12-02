@@ -19,7 +19,7 @@ internal sealed class PdfPigReader : IngestionDocumentReader
         return Task.FromResult(document);
     }
 
-    private static IngestionDocumentSection GetPageSection(Page pdfPage)
+    static IngestionDocumentSection GetPageSection(Page pdfPage)
     {
         var section = new IngestionDocumentSection
         {

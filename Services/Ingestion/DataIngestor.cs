@@ -6,11 +6,10 @@ using Microsoft.ML.Tokenizers;
 
 namespace AiChatWebApp.Services.Ingestion;
 
-public class DataIngestor(
-    ILogger<DataIngestor> logger,
-    ILoggerFactory loggerFactory,
-    VectorStore vectorStore,
-    IEmbeddingGenerator<string, Embedding<float>> embeddingGenerator)
+public class DataIngestor(ILogger<DataIngestor> logger,
+                            ILoggerFactory loggerFactory,
+                            VectorStore vectorStore,
+                            IEmbeddingGenerator<string, Embedding<float>> embeddingGenerator)
 {
     public async Task IngestDataAsync(DirectoryInfo directory, string searchPattern)
     {

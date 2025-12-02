@@ -1,5 +1,5 @@
-﻿using System.Text.Json.Serialization;
-using Microsoft.Extensions.VectorData;
+﻿using Microsoft.Extensions.VectorData;
+using System.Text.Json.Serialization;
 
 namespace AiChatWebApp.Services;
 
@@ -9,21 +9,26 @@ public class IngestedChunk
     public const string VectorDistanceFunction = DistanceFunction.CosineDistance;
     public const string CollectionName = "data-aichatwebapp-chunks";
 
+
     [VectorStoreKey(StorageName = "key")]
     [JsonPropertyName("key")]
     public required Guid Key { get; set; }
+
 
     [VectorStoreData(StorageName = "documentid")]
     [JsonPropertyName("documentid")]
     public required string DocumentId { get; set; }
 
+
     [VectorStoreData(StorageName = "content")]
     [JsonPropertyName("content")]
     public required string Text { get; set; }
 
+
     [VectorStoreData(StorageName = "context")]
     [JsonPropertyName("context")]
     public string? Context { get; set; }
+
 
     [VectorStoreVector(VectorDimensions, DistanceFunction = VectorDistanceFunction, StorageName = "embedding")]
     [JsonPropertyName("embedding")]
