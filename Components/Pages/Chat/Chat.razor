@@ -1,5 +1,6 @@
 ﻿@page "/"
 @using System.ComponentModel
+@using System.Text.RegularExpressions
 
 @inject IChatClient ChatClient
 @inject OpenWeatherClient OpenWeatherClient
@@ -61,14 +62,14 @@
         2. Do **not** include any weather data or text description in your reply.
         3. Do **not** mention temperature, humidity, wind, pressure, or any similar measurements.
         4. Instead, your entire reply must consist of **only one XML tag** in this exact format:
-        
+
            `<Weather City=""CITY_NAME"" />`
-        
+
         5. Replace `CITY_NAME` with the name of the city that was requested.
         6. Absolutely no other text, markdown, or punctuation is allowed before or after the tag.
-        
+
         **Example:**
-        User: What is the weather in Zagreb?  
+        User: What is the weather in Zagreb?
         Assistant: `<Weather City=""Zagreb"" />`
 
         ---
@@ -147,6 +148,13 @@
             chatOptions.ConversationId = update.ConversationId;
             ChatMessageItem.NotifyChanged(currentResponseMessage);
         }
+
+        // ✅ Gotov stream – provjeri sadrži li <Weather City="..."/>
+        // if (responseText.Text.Contains("<Weather City=", StringComparison.OrdinalIgnoreCase))
+        // {
+        //     var match = Regex.Match(responseText.Text, @"<Weather City=""[^""]+""\s*/>");
+        //     if (match.Success) responseText.Text = match.Value; // obriši sve osim taga
+        // }
 
         // Store the final response in the conversation, and begin getting suggestions
         messages.Add(currentResponseMessage!);

@@ -7,7 +7,7 @@ public static class AiModelsConfiguration
         var ollamaUri = new Uri("http://localhost:11434");
 
         // 💡 mali, laki modeli — za laptop
-        string[] modelName = ["all-minilm", "tinyllama", "qwen2.5:0.5b"];
+        string[] modelName = ["all-minilm", "tinyllama", "qwen2.5:0.5b", "qwen3:1.7b"];
 
         IChatClient chatClient = new OllamaApiClient(ollamaUri, modelName[2]);
         IEmbeddingGenerator<string, Embedding<float>> embeddingGenerator = new OllamaApiClient(ollamaUri, modelName[0]);
