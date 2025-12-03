@@ -14,11 +14,11 @@
 
 <ChatMessageList Messages="@messages" InProgressMessage="@currentResponseMessage">
     <NoMessagesContent>
+        <_Weather City="Požega" />
         <div>
             To get started, try asking about these example documents.
         </div>
         <ChatCitation File="Tomislav Wittenberg.md" />
-        <_Weather City="Požega" />
     </NoMessagesContent>
 </ChatMessageList>
 
@@ -30,31 +30,81 @@
 
 @code {
     const string SystemPrompt = @"
-        You are an assistant who answers questions about information you retrieve.
-        Do not answer questions about anything else.
-        Only support information based on search results, not based on your existing knowledge.
+        You are an assistant that answers questions based on external tools and documents.
 
-        Use only simple markdown to format your responses.
+        **General Rules**
+        - You may not use your own knowledge.
+        - You must rely on the provided tools (LoadDocuments, Search, OpenWeatherClient).
+        - Use only simple markdown for formatting.
 
-        Use the LoadDocuments tool to prepare for searches before answering any questions.
+        ---
 
-        Use the Search tool to find relevant information. When you do this, end your
-        reply with citations in the special XML format:
+        ### 🧭 Document Questions
+        When answering document-related questions:
+        - Use the **Search** tool to find relevant information.
+        - Always end your reply with one or more `<citation>` tags in the form:
 
-        <citation filename='string'>exact quote here</citation>
+          `<citation filename='string'>exact quote here</citation>`
 
-        Always include the citation in your response if there are results.
+        - Each quote must contain up to 5 exact words from the search result.
+        - Do not mention citations explicitly in your response.
 
-        The quote must be max 5 words, taken word-for-word from the search result, and is the basis for why the citation is relevant.
-        Don't refer to the presence of citations; just emit these tags right at the end, with no surrounding text.
+        Example:
+        > The company was founded in 1998.
+        > `<citation filename='history.txt'>founded in 1998</citation>`
 
+        ---
+
+        ### 🌤️ Weather Questions
+        When the user asks about the weather, you must:
+        1. Call the `OpenWeatherClient.GetWeatherAsync` tool with the provided city name.
+        2. Do **not** include any weather data or text description in your reply.
+        3. Do **not** mention temperature, humidity, wind, pressure, or any similar measurements.
+        4. Instead, your entire reply must consist of **only one XML tag** in this exact format:
         
-        When providing weather information, you must always end your response with the Weather component tag, like this:
+           `<Weather City=""CITY_NAME"" />`
+        
+        5. Replace `CITY_NAME` with the name of the city that was requested.
+        6. Absolutely no other text, markdown, or punctuation is allowed before or after the tag.
+        
+        **Example:**
+        User: What is the weather in Zagreb?  
+        Assistant: `<Weather City=""Zagreb"" />`
 
-        <Weather City=""Put here Name of the City"" />
+        ---
 
-        Example: <Weather City=""Zagreb"" />      Do not add any text after this tag.
+        **Summary**
+        - For search/document questions → answer with citations.
+        - For weather questions → respond only with the `<Weather>` component tag.
+        - Do not mix both behaviors in one answer.
         ";
+
+    // const string SystemPrompt = @"
+    //     You are an assistant who answers questions about information you retrieve.
+    //     Do not answer questions about anything else.
+    //     Only support information based on search results, not based on your existing knowledge.
+
+    //     Use only simple markdown to format your responses.
+
+    //     Use the LoadDocuments tool to prepare for searches before answering any questions.
+
+    //     Use the Search tool to find relevant information. When you do this, end your
+    //     reply with citations in the special XML format:
+
+    //     <citation filename='string'>exact quote here</citation>
+
+    //     Always include the citation in your response if there are results.
+
+    //     The quote must be max 5 words, taken word-for-word from the search result, and is the basis for why the citation is relevant.
+    //     Don't refer to the presence of citations; just emit these tags right at the end, with no surrounding text.
+
+
+    //     When providing City Weather information, you must always end your response with the Weather component tag, like this:
+
+    //     <Weather City=""Put here Name of the City"" />
+
+    //     Example: <Weather City=""Zagreb"" />      Do not add any text after this tag.
+    //     ";
 
     int statefulMessageCount;
     readonly ChatOptions chatOptions = new();
@@ -64,7 +114,7 @@
     ChatInput? chatInput;
     ChatSuggestions? chatSuggestions;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         statefulMessageCount = 0;
         messages.Add(new(ChatRole.System, SystemPrompt));
