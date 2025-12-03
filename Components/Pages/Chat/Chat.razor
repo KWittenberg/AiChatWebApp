@@ -18,6 +18,7 @@
             To get started, try asking about these example documents.
         </div>
         <ChatCitation File="Tomislav Wittenberg.md" />
+        <Weather City="Požega" />
     </NoMessagesContent>
 </ChatMessageList>
 
@@ -46,6 +47,13 @@
 
         The quote must be max 5 words, taken word-for-word from the search result, and is the basis for why the citation is relevant.
         Don't refer to the presence of citations; just emit these tags right at the end, with no surrounding text.
+
+        
+        When providing weather information, you must always end your response with the Weather component tag, like this:
+
+        <Weather City=""Put here Name of the City"" />
+
+        Example: <Weather City=""Zagreb"" />      Do not add any text after this tag.
         ";
 
     int statefulMessageCount;
@@ -136,18 +144,18 @@
         return results.Select(result => $"<result filename=\"{result.DocumentId}\">{result.Text}</result>");
     }
 
-    
+
     // async Task<IEnumerable<string>> GeocodeAsync([Description("The address or place name to geocode.")] string location)
     async Task<GeocodingResult?> GeocodeAsync([Description("The address or place name to geocode.")] string location)
     {
         using var httpClient = new HttpClient();
         var url = $"https://geocoding-api.open-meteo.com/v1/search?name={Uri.EscapeDataString(location)}&count=1";
         var response = await httpClient.GetFromJsonAsync<GeocodingResponse>(url);
-        
+
         var resultText = response?.Results.FirstOrDefault() != null
             ? $"Location: {response.Results[0].Name}, Latitude: {response.Results[0].Latitude}, Longitude: {response.Results[0].Longitude}"
             : "Could not find the specified location.";
-        
+
         Console.WriteLine("GeocodeAsync response: " + resultText);
 
         return response!.Results.FirstOrDefault();
@@ -158,7 +166,7 @@
         // var result = response.Results[0];
         // return [$"Location: {result.Name}, Latitude: {result.Latitude}, Longitude: {result.Longitude}"];
     }
-    
+
     record GeocodingResponse(GeocodingResult[] Results);
     record GeocodingResult(string Name, float Latitude, float Longitude);
 
@@ -174,7 +182,7 @@
     //     {
     //         return ["Could not retrieve weather data."];
     //     }
-                
+
     //     return response.Daily.Temperature_2m_Max.Select((temp, index) => $"Day {index + 1}: {temp}°C");
     // }
 

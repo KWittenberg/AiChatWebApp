@@ -1,0 +1,56 @@
+﻿@* @page "/weather/{city}" *@
+
+@inject OpenWeatherClient OpenWeatherClient
+
+@if (OpenWeather is not null)
+{
+    <div class="container-fluid px-1 px-md-4 py-5 mx-auto">
+        <div class="row d-flex justify-content-center px-3">
+            <div class="card">
+
+                <div class="p-4 d-flex justify-content-between">
+                    <div class="">
+                    <h1 class="large-font">@OpenWeather.Name</h1>
+                    <img class="m-0 p-0" src="@Icon" alt="Weather Icon" />
+                    </div>
+                    <div class="">
+                        <p class="m-0 med-font">@WeatherMain</p>
+                        <p class="med-font">@WeatherDescription</p>
+                        <h1 class="large-font">@Temp</h1>
+
+                    </div>
+                </div>
+
+                <p class="time-font mb-0 ms-4 mt-auto">@DateTime.Now.ToShortTimeString()</p>
+                <p class="ms-4 mb-4">@DateTime.Now.ToString("dd. MMMM, yyyy.")</p>
+                @* <p class="ms-4 mb-4">Wednesday, 09 November 2024<span class="sm-font">AM</span></p> *@
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public string City { get; set; } = "Požega";
+    OpenWeatherModel? OpenWeather;
+
+    string? WeatherMain;
+    string? WeatherDescription;
+    string? WeatherIcon;
+    string? Temp => $"{OpenWeather?.Main?.Temp}°C";
+    string? Icon => $"//openweathermap.org/img/wn/{WeatherIcon}@2x.png";
+
+    protected override async Task OnParametersSetAsync()
+    {
+        OpenWeather = await OpenWeatherClient.GetWeatherAsync(City);
+
+        foreach (var weather in OpenWeather?.Weather!)
+        {
+            WeatherMain = weather.Main;
+            WeatherDescription = weather.Description;
+            WeatherIcon = weather.Icon;
+        }
+
+
+
+    }
+}

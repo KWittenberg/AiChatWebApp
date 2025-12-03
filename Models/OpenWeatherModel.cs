@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace AiChatWebApp.Models;
+﻿namespace AiChatWebApp.Models;
 
 public class OpenWeatherModel
 {
