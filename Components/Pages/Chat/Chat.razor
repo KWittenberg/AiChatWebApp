@@ -2,6 +2,7 @@
 @using System.ComponentModel
 
 @inject IChatClient ChatClient
+@inject OpenWeatherClient OpenWeatherClient
 @inject NavigationManager Nav
 @inject SemanticSearch Search
 
@@ -30,6 +31,8 @@
     const string SystemPrompt = @"
         You are an assistant who answers questions about information you retrieve.
         Do not answer questions about anything else.
+        Only support information based on search results, not based on your existing knowledge.
+
         Use only simple markdown to format your responses.
 
         Use the LoadDocuments tool to prepare for searches before answering any questions.
@@ -60,7 +63,9 @@
 
         chatOptions.Tools = [
             AIFunctionFactory.Create(LoadDocumentsAsync),
-            AIFunctionFactory.Create(SearchAsync)
+            AIFunctionFactory.Create(SearchAsync),
+            // AIFunctionFactory.Create(GeocodeAsync),
+            AIFunctionFactory.Create(OpenWeatherClient.GetWeatherAsync)
         ];
     }
 
@@ -112,6 +117,8 @@
         await chatInput!.FocusAsync();
     }
 
+
+    #region RAG Functions - Tools for Retrieval-Augmented Generation
     [Description("Loads the documents needed for performing searches. Must be completed before a search can be executed, but only needs to be completed once.")]
     async Task LoadDocumentsAsync()
     {
@@ -128,6 +135,52 @@
         var results = await Search.SearchAsync(searchPhrase, filenameFilter, maxResults: 5);
         return results.Select(result => $"<result filename=\"{result.DocumentId}\">{result.Text}</result>");
     }
+
+    
+    // async Task<IEnumerable<string>> GeocodeAsync([Description("The address or place name to geocode.")] string location)
+    async Task<GeocodingResult?> GeocodeAsync([Description("The address or place name to geocode.")] string location)
+    {
+        using var httpClient = new HttpClient();
+        var url = $"https://geocoding-api.open-meteo.com/v1/search?name={Uri.EscapeDataString(location)}&count=1";
+        var response = await httpClient.GetFromJsonAsync<GeocodingResponse>(url);
+        
+        var resultText = response?.Results.FirstOrDefault() != null
+            ? $"Location: {response.Results[0].Name}, Latitude: {response.Results[0].Latitude}, Longitude: {response.Results[0].Longitude}"
+            : "Could not find the specified location.";
+        
+        Console.WriteLine("GeocodeAsync response: " + resultText);
+
+        return response!.Results.FirstOrDefault();
+        // if (response?.Results is null || response.Results.Length == 0)
+        // {
+        //     return ["Could not find the specified location."];
+        // }
+        // var result = response.Results[0];
+        // return [$"Location: {result.Name}, Latitude: {result.Latitude}, Longitude: {result.Longitude}"];
+    }
+    
+    record GeocodingResponse(GeocodingResult[] Results);
+    record GeocodingResult(string Name, float Latitude, float Longitude);
+
+
+    // async Task<IEnumerable<string>> GetWeatherAsync(
+    //     [Description("The latitude of the location to get the weather for.")] float latitude,
+    //     [Description("The longitude of the location to get the weather for.")] float longitude)
+    // {
+    //     using var httpClient = new HttpClient();
+    //     var url = $"https://api.open-meteo.com/v1/forecast?latitude={latitude}&longitude={longitude}&daily=temperature_2m_max&timezone=auto";
+    //     var response = await httpClient.GetFromJsonAsync<WeatherResponse>(url);
+    //     if (response?.Daily?.Temperature_2m_Max is null)
+    //     {
+    //         return ["Could not retrieve weather data."];
+    //     }
+                
+    //     return response.Daily.Temperature_2m_Max.Select((temp, index) => $"Day {index + 1}: {temp}°C");
+    // }
+
+    // record WeatherResponse(WeatherReports Daily);
+    // record WeatherReports(float[] Temperature_2m_Max);
+    #endregion
 
     public void Dispose() => currentResponseCancellation?.Cancel();
 }

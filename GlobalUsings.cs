@@ -1,0 +1,9 @@
+﻿global using AiChatWebApp.Components;
+global using AiChatWebApp.Models;
+global using AiChatWebApp.Services;
+global using AiChatWebApp.Services.Ingestion;
+global using Microsoft.Extensions.AI;
+global using Microsoft.Extensions.Options;
+global using N10.Extensions;
+global using OllamaSharp;
+global using System.ComponentModel;

@@ -1,15 +1,16 @@
-using AiChatWebApp.Components;
-using AiChatWebApp.Services;
-using AiChatWebApp.Services.Ingestion;
-using Microsoft.Extensions.AI;
-using OllamaSharp;
-
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddRazorComponents().AddInteractiveServerComponents();
+var services = builder.Services;
+var configuration = builder.Configuration;
+
+// Add Identity, Repositories, Services, Localization, Validators, Seed 
+services.AddConfigureServices(configuration);
+
+
+
 
 
 // Initialize Ollama API client
-string[] modelName = ["all-minilm", "tinyllama", "qwen3:1.7b"];
+string[] modelName = ["all-minilm", "tinyllama", "qwen2.5:0.5b"];
 IChatClient chatClient = new OllamaApiClient(new Uri("http://localhost:11434"), modelName[2]);
 IEmbeddingGenerator<string, Embedding<float>> embeddingGenerator = new OllamaApiClient(new Uri("http://localhost:11434"), modelName[0]);
 
@@ -18,22 +19,29 @@ IEmbeddingGenerator<string, Embedding<float>> embeddingGenerator = new OllamaApi
 string dbName = "vector-store.db";
 var vectorStorePath = Path.Combine(AppContext.BaseDirectory, dbName);
 var vectorStoreConnectionString = $"Data Source={vectorStorePath}";
-builder.Services.AddSqliteVectorStore(_ => vectorStoreConnectionString);
-builder.Services.AddSqliteCollection<string, IngestedChunk>(IngestedChunk.CollectionName, vectorStoreConnectionString);
+
+
+services.AddSqliteVectorStore(_ => vectorStoreConnectionString);
+services.AddSqliteCollection<string, IngestedChunk>(IngestedChunk.CollectionName, vectorStoreConnectionString);
 
 
 // Register application services
-builder.Services.AddSingleton<DataIngestor>();
-builder.Services.AddSingleton<SemanticSearch>();
-builder.Services.AddKeyedSingleton("ingestion_directory", new DirectoryInfo(Path.Combine(builder.Environment.WebRootPath, "Data")));
+services.AddSingleton<DataIngestor>();
+services.AddSingleton<SemanticSearch>();
+services.AddKeyedSingleton("ingestion_directory", new DirectoryInfo(Path.Combine(builder.Environment.WebRootPath, "Data")));
 
 
-builder.Services.AddChatClient(chatClient)
-                .UseFunctionInvocation() // Important for PDF/Document Search!
-                .UseLogging();
+services.AddChatClient(chatClient)
+        .UseFunctionInvocation() // Important for PDF/Document Search!
+        .UseLogging();
 
 
-builder.Services.AddEmbeddingGenerator(embeddingGenerator);
+services.AddEmbeddingGenerator(embeddingGenerator);
+
+
+
+
+
 
 var app = builder.Build();
 
